@@ -5,13 +5,12 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "start": " nodemon app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.1483.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -22,6 +21,6 @@
     "nodemon": "^3.0.1",
     "razorpay": "^2.9.2",
     "sequelize": "^6.33.0",
-    "uuid": "^9.0.1"
+    "sib-api-v3-sdk": "^8.5.0"
   }
 }

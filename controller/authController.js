@@ -62,14 +62,14 @@ exports.postLogin = async (req, res, next) => {
             user0.dataValues.password,
             async (err, response) => {
                if (response == true) {
-                  const token = await jwt.sign(
-                     { id: user0.dataValues.id },
-                     "secretkey"
-                  );
+
+                  const token =  await jwt.sign({ id: user0.dataValues.id , ispremiumuser : user0.dataValues.ispremiumuser }, process.env.TOKEN_KEY);
+
                   res.status(200).json({
                      message: "Login successful",
                      token: token,
                   });
+
                } else {
                   res.status(401).json({ message: "bad credentials" });
                }

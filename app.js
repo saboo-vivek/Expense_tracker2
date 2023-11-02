@@ -9,23 +9,22 @@ app.use(cors());
 app.use(express.json());
 
 const authRoutes = require("./routes/authroutes");
-app.use(authRoutes);
-
 const expenseRoutes = require("./routes/expenseroutes");
-app.use(expenseRoutes);
-
 const purchaseroutes = require('./routes/purchase');
+const premiumroutes = require('./routes/premium');
+const forgotroute = require('./routes/forgotpassword');
+
+app.use(authRoutes);
+app.use(expenseRoutes);
 app.use(purchaseroutes);
+app.use(premiumroutes);
+app.use(forgotroute);
 
-// const premiumroutes = require('./routes/premium');
-// app.use(premiumroutes);
-
-// const forgotpasswordroutes = require('./routes/forgotpassword');
-// app.use(forgotpasswordroutes);
 
 const User = require("./models/user");
 const Expense = require("./models/expenses");
 const Order = require('./models/orders');
+const ForGotPassword=require('./models/forgotpassword')
 
 User.hasMany(Expense);
 Expense.belongsTo(User)
@@ -33,8 +32,9 @@ Expense.belongsTo(User)
 User.hasMany(Order);
 Order.belongsTo(User);
 
-// User.hasMany(forGotPassword);
-// forGotPassword.belongsTo(User);
+
+User.hasMany(ForGotPassword);
+ForGotPassword.belongsTo(User);
 
 async function initiate() {
    try {

@@ -27,10 +27,22 @@
       <div>
          <button id="rzp-button1">Buy Premium</button>
       </div>
+      <div id="message"></div>
+
+      <button id="leaderboardbtn" hidden onclick="showLeaderboard()">
+         Leader-Board
+      </button>
+
+      <button id="reportbtn" hidden onclick="reportgeneration()">
+         Report
+      </button>
 
       <div>
+         <h2>Expenses</h2>
          <ul style="list-style-type: circle" id="items"></ul>
       </div>
+
+      <div id="leaderboard"></div>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
 
@@ -50,9 +62,34 @@
 
             items.innerHTML += ul;
          }
+
+         function showPremiumMessage() {
+            document.getElementById("rzp-button1").style.visibility = "hidden";
+            document.getElementById("message").innerHTML =
+               "You are a premium user";
+
+            document.getElementById("leaderboardbtn").removeAttribute("hidden");
+            document.getElementById("reportbtn").removeAttribute("hidden");
+         }
+
+         const parseJwt = (token) => {
+            try {
+               return JSON.parse(atob(token.split(".")[1]));
+            } catch (e) {
+               return null;
+            }
+         };
+
          const token = localStorage.getItem("token");
 
          window.addEventListener("DOMContentLoaded", () => {
+            const decodeToken = parseJwt(token);
+            console.log("decoded token:", decodeToken);
+            const ispremiumuser = decodeToken.ispremiumuser;
+            if (ispremiumuser) {
+               showPremiumMessage();
+               // showLeaderboard();
+            }
             axios
                .get(`http://localhost:3000/pastentries`, {
                   headers: { Authorization: token },
@@ -90,6 +127,7 @@
                      console.log("post res:");
                      console.log(res.data);
                      display(res.data);
+                     showLeaderboard();
                      document.getElementById("amount").value = "";
                      document.getElementById("desc").value = "";
                      document.getElementById("cat").value = "Choose Category";
@@ -109,6 +147,7 @@
                   console.log(res);
                   let x = document.getElementById(id);
                   items.removeChild(x);
+                  showLeaderboard();
                })
                .catch((err) => {
                   console.log(err);
@@ -116,13 +155,14 @@
          }
 
          document.getElementById("rzp-button1").onclick = async function (e) {
+            console.log("buy prem button clicked");
             const response = await axios.get(
                "http://localhost:3000/purchase/premium",
                {
                   headers: { Authorization: token },
                }
             );
-            console.log("res:")
+            console.log("res:");
             console.log(response);
             var options = {
                key: response.data.key_id,
@@ -138,9 +178,9 @@
                   );
 
                   alert("You are a premium user");
-                  // showPremiumMessage();
-                  // localStorage.setItem("token", res.data.token);
-                  // showLeaderboard();
+                  showPremiumMessage();
+                  localStorage.setItem("token", res.data.token);
+                  showLeaderboard();
                },
             };
             const rzp1 = new Razorpay(options);
@@ -148,20 +188,67 @@
             e.preventDefault();
 
             rzp1.on("payment.failed", async function (response) {
+               console.log("payment failed");
                console.log(response);
 
-               // const resp = await axios.post(
-               //    "http://localhost:3000/purchase/updatetransactionfail",
-               //    {
-               //       order_id: options.order_id,
-               //    },
-               //    { headers: { Authorization: token } }
-               // );
+               const resp = await axios.post(
+                  "http://localhost:3000/purchase/updatetransactionfail",
+                  {
+                     order_id: options.order_id,
+                  },
+                  { headers: { Authorization: token } }
+               );
 
-               // console.log(resp);
+               console.log(resp);
                alert("something went wrong");
             });
          };
+
+         async function showLeaderboard() {
+            console.log("show leader board clicked");
+            const userLeaderBoardArray = await axios.get(
+               "http://localhost:3000/premium/getleaderboard",
+               {
+                  headers: {
+                     Authorization: token,
+                  },
+               }
+            );
+            console.log(">>>", userLeaderBoardArray.data);
+
+            var leaderboardElem = document.getElementById("leaderboard");
+
+            leaderboardElem.innerHTML = " ";
+
+            let heading = `<h2>Leader Board</h2>`;
+            leaderboardElem.innerHTML += heading;
+
+            let li='', ol;
+            
+
+            userLeaderBoardArray.data.forEach((userDetails) => {
+               let newli = `<li>Name- ${userDetails.name} Total Expense - ${
+                  userDetails.totalexpenses || 0
+               }
+               </li>`;
+               li += newli;
+            });
+            
+            ol = `<ul>${li}</ul>`;
+            leaderboardElem.innerHTML += ol;
+         }
+
+         async function reportgeneration(){
+            console.log("report button clicked")
+            await axios.get(
+               "http://localhost:3000/premium/reportgeneration",
+               {
+                  headers: {
+                     Authorization: token,
+                  },
+               }
+            );
+         }
       </script>
    </body>
 </html>

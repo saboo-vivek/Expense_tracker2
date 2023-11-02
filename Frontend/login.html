@@ -11,9 +11,12 @@
          <input type="email" id="email" name="email" required >
          <label for="password">Enter password</label>
          <input type="password" id="password" name="password" required >
-         <button type="submit">Login</button><br>
-         <a href="/">New User - SignUp</a>
+         <button type="submit">Login</button><br><br>
+         
       </form>
+
+      <button type="submit" onclick="forgotpass()">Forgot Password</button>
+         <a href="/">New User - SignUp</a>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
 
@@ -34,6 +37,11 @@
                   console.log(err);
                   alert(err.response.data.message);
                });
+         }
+
+         async function forgotpass(){
+            console.log('forgot pass clicked')
+            window.location.href = "/forgotform";
          }
       </script>
       
