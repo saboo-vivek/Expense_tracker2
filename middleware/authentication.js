@@ -23,12 +23,12 @@ exports.authenticate = (req,res,next)=>{
     }
 }
 
-// exports.checkpremium =( req,res,next)=>{
-//     const ispremiumuser = req.user.ispremiumuser ;
-//     if(!ispremiumuser){
-//         return res.status(400).json({message : 'Buy Premium'});
-//     }else{
-//         next();
-//     }
+exports.checkpremium =( req,res,next)=>{
+    const ispremiumuser = req.user.ispremiumuser ;
+    if(!ispremiumuser){
+        return res.status(400).json({message : 'Buy Premium'});
+    }else{
+        next();
+    }
 
-// }
+}

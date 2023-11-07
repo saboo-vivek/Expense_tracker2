@@ -1,66 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
-</head>
-<body>
-    <h1>Expense Tracker</h1>
-    
-    <form id="expenseForm">
-        <label for="year">Year:</label>
-        <input type="number" id="year" name="year" min="1900" max="9999" required><br><br>
-        
-        <label for="month">Month:</label>
-        <input type="number" id="month" name="month" min="1" max="12" required><br><br>
-        
-        <input type="submit" value="Submit">
-    </form>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Expense Tracker</title>
+   </head>
+   <body>
+      <h1>Expense Tracker</h1>
 
-    <div id="expensesResult"></div>
+      <form id="expenseForm">
+         <label for="year">Year:</label>
+         <input
+            type="number"
+            id="year"
+            name="year"
+            min="1900"
+            max="9999"
+            required
+         /><br /><br />
 
-    <script>
-        document.getElementById('expenseForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+         <label for="month">Month:</label>
+         <input
+            type="number"
+            id="month"
+            name="month"
+            min="1"
+            max="12"
+            required
+         /><br /><br />
 
-            // Get the values of year and month from the form
-            const year = document.getElementById('year').value;
-            const month = document.getElementById('month').value;
+         <input type="submit" value="Submit" />
+      </form>
 
-            // Assuming you have a way to retrieve expenses data
-            const expensesData = getExpensesData(year, month);
+      <div id="expensesResult"></div>
+      <div id="expenseSum"></div>
+      
 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+      <script>
+         const parseJwt = (token) => {
+            try {
+               return JSON.parse(atob(token.split(".")[1]));
+            } catch (e) {
+               return null;
+            }
+         };
+
+         const token = localStorage.getItem("token");
+         const decodeToken = parseJwt(token);
+         console.log("decoded token:", decodeToken);
+
+         function display(obj) {
             // Display the expenses
-            const expensesResult = document.getElementById('expensesResult');
-            expensesResult.innerHTML = `
+            const year = document.getElementById("year").value;
+            const month = document.getElementById("month").value;
+            let sum = 0;
+
+            const expensesResult = document.getElementById("expensesResult");
+            const expenseSum = document.getElementById("expenseSum");
+
+            if (obj.length === 0) {
+               expensesResult.innerHTML = `
+                <h2>Expenses for ${getMonthName(month)} ${year}</h2>
+                <h3>No Record found</h3>`;
+            } else {
+               expensesResult.innerHTML = `
                 <h2>Expenses for ${getMonthName(month)} ${year}</h2>
                 <ul>
-                    ${expensesData.map(expense => `<li>${expense.description}: $${expense.amount}</li>`).join('')}
+                    ${obj
+                       .map(
+                          (expense) =>
+                             `<li>${expense.category} (${expense.description}): ₹${expense.amount}</li>`
+                       )
+                       .join("")}
                 </ul>
             `;
-        });
+            }
+            obj.forEach((element) => {
+               // console.log()
+               sum += parseInt(element.amount);
+            });
+            expenseSum.innerHTML = `
+                <h2>Total expenses for year ${year}</h2>
+                <h3>${sum}</h3>`;
+         }
 
-        // Function to retrieve expenses data (replace this with your actual data retrieval logic)
-        function getExpensesData(year, month) {
-            // This is a placeholder function. Replace with your actual data retrieval logic.
-            // It should return an array of objects with description and amount.
-            return [
-                { description: 'Groceries', amount: 100 },
-                { description: 'Rent', amount: 1200 },
-                { description: 'Utilities', amount: 200 },
-                // Add more expenses as needed
-            ];
-        }
+         document
+            .getElementById("expenseForm")
+            .addEventListener("submit", function (event) {
+               event.preventDefault();
 
-        // Function to get the name of the month
-        function getMonthName(month) {
+               
+
+               const userId = decodeToken.id;
+               const year = document.getElementById("year").value;
+               const month = document.getElementById("month").value;
+               console.log(year,month)
+               // Get the values of year and month from the form
+
+               // Assuming you have a way to retrieve expenses data
+
+               axios
+                  .post(`/premium/report/data/${userId}`, { month, year })
+                  .then((res) => {
+                     console.log(res.data);
+                     display(res.data);
+                  })
+                  .catch((err) => {
+                     console.log(err);
+                  });
+               //        const expensesData = getExpensesData(year, month);
+            });
+
+         // Function to get the name of the month
+         function getMonthName(month) {
             const monthNames = [
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
+               "January",
+               "February",
+               "March",
+               "April",
+               "May",
+               "June",
+               "July",
+               "August",
+               "September",
+               "October",
+               "November",
+               "December",
             ];
             return monthNames[month - 1];
-        }
-    </script>
-</body>
+         }
+
+         
+      </script>
+   </body>
 </html>

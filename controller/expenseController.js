@@ -13,7 +13,11 @@ exports.getAll = (req, res) => {
    console.log(req.user.dataValues);
    console.log("------------------");
    expense
-      .findAll({ where: { userId: req.user.dataValues.id } })
+      .findAll({
+         where: { userId: req.user.dataValues.id },
+         order: [["updatedAt", "ASC"]],
+      })
+
       .then((data) => {
          res.status(200).send(data);
       });
@@ -73,9 +77,25 @@ exports.delExpense = async (req, res) => {
       res.status(500).send(error);
       console.log(error);
    }
-   // expense
-   //    .destroy({ where: { id: req.params.id } })
-   //    .then(() => {
-   //       res.status(200).send("Data deleted successfully");
-   //    })
+   
+};
+
+const S3services=require('../services/s3services')
+exports.getDownload = async (req, res, next) => {
+   try {
+      console.log('get Download')
+      console.log(req.user)
+      const userid = req.user.dataValues.id;
+      const expenses = await req.user.getExpenses(req);
+      const stringifiedExpenses = JSON.stringify(expenses);
+      const filename = `Expenses${userid}/${new Date()}.txt`;
+      const fileUrl = await S3services.uploadtoS3(
+         stringifiedExpenses,
+         filename
+      );
+      res.status(200).json({ fileUrl, success: true });
+   } catch (err) {
+      console.log(err);
+      res.status(500).json({ fileUrl: "", success: false, err: err });
+   }
 };

@@ -7,6 +7,6 @@ router.get('/app',expenseController.getApp);
 router.get('/pastentries',authmiddleware.authenticate ,expenseController.getAll);
 router.post('/addexpense',authmiddleware.authenticate ,expenseController.postAddExpense)
 router.delete('/deletexpense/:id',authmiddleware.authenticate ,expenseController.delExpense)
-
+router.get('/download',authmiddleware.authenticate ,expenseController.getDownload);
 
 module.exports=router;
